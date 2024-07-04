@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -11,15 +10,16 @@ import Link from "next/link";
 export const AddressBar = () => {
   return (
     <div className="bg-slate-400/20 ">
-      <div className="flex md:flex-col max-w-[1400px] m-auto md:h-[300px] lg:h-[150px] pt-4 pb-4 lg:flex-row lg:justify-around items-center ">
-        <div>
-          <img
-            src={"/icons/logo-visa.png"}
-            alt="logo"
-            className="bg-cover md:w-[500px] md:h-[100px] w-[300px] h-[100px]"
-          />
-        </div>
-        <div className="mt-4 flex space-x-6 ">
+      <div className=" md:flex md:flex-col max-w-[1000px] m-auto md:h-[300px] lg:h-[150px] pt-4 pb-4 lg:flex-row lg:justify-around items-center ">
+        <Image
+          src={"/icons/logo-visa.png"}
+          alt="logo"
+          width={300}
+          height={100}
+          className="bg-cover m-auto"
+        />
+
+        <div className="hidden  mt-4 md:flex space-x-4 ">
           <div className="flex  flex-col items-center space-y-1">
             <FontAwesomeIcon style={{ height: "20px" }} icon={faMailBulk} />
             <Link

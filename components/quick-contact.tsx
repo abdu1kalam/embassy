@@ -25,7 +25,7 @@ export const QuickContact = () => {
           Read more
         </button>
       </div>
-      <div className="lg:w-1/2">
+      <div className="mt-10 lg:w-1/2  lg:ml-10 lg:mt-0">
         <ContactForm />
       </div>
     </div>

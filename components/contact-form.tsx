@@ -16,9 +16,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { ChangeEvent, FormEvent, useState } from "react";
+
+import { useToast } from "./ui/use-toast";
+import { Loader } from "./loader";
 
 const contactSchema = z.object({
-  name: z.string().min(2, {
+  fullName: z.string().min(2, {
     message: "Username must be at least 2 characters.",
   }),
   email: z.string().email({
@@ -30,50 +34,100 @@ const contactSchema = z.object({
 type ContactFormData = z.infer<typeof contactSchema>;
 
 export function ContactForm() {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<ContactFormData>({
-    resolver: zodResolver(contactSchema),
+  const [formData, setFormData] = useState<ContactFormData>({
+    fullName: "",
+    email: "",
+    message: "",
   });
+  const [isSending, setIsSending] = useState<boolean>(false);
+  const { toast } = useToast();
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev: ContactFormData) => ({ ...prev, [name]: value }));
+  };
 
-  const onSubmit = async (data: ContactFormData) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    //confirm email and message field are not empty
+    if (!formData.fullName || !formData.email || !formData.message) {
+      toast({ title: "Email and message are required fields" });
+      return;
+    }
+
     try {
-      const resend = new Resend(process.env.RESEND_API_KEY);
-      await resend.emails({
-        from: "babbu36790@gmail.com",
-        to: "admin@example.com",
-        subject: `New Contact Form Submission from ${data.name}`,
-        html: `<p>Name: ${data.name}</p><p>Email: ${data.email}</p><p>Message: ${data.message}</p>`,
+      setIsSending(true);
+      const response = await fetch("/api/send", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          message: formData.message,
+        }),
       });
-      alert("Message sent successfully!");
+
+      // handle success
+      if (response.ok) {
+        toast({ title: "Email Sent Successfully!" });
+        setFormData({
+          fullName: "",
+          email: "",
+          message: "",
+        });
+      } else {
+        toast({ title: "There was a problem sending email. Pls try again!" });
+      }
     } catch (error) {
-      console.error("Error sending email:", error);
-      alert("Failed to send message.");
+      console.log("Error sending email:", error);
+      toast({ title: "There was a problem sending email. Pls try again!" });
+    } finally {
+      setIsSending(false);
     }
   };
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <FormField
-          control={form.control}
-          name="username"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Username</FormLabel>
-              <FormControl>
-                <Input placeholder="shadcn" {...field} />
-              </FormControl>
-              <FormDescription>
-                This is your public display name.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type="submit">Submit</Button>
-      </form>
-    </Form>
+    <form
+      onSubmit={handleSubmit}
+      className="border-none p-0"
+      data-aos="fade-down"
+    >
+      <input
+        name="fullName"
+        type="text"
+        placeholder="Your full name"
+        value={formData.fullName}
+        onChange={handleChange}
+        className="text-black w-full p-2 mb-4 border border-gray-300 rounded"
+        required
+      />
+      <input
+        name="email"
+        type="email"
+        placeholder="your-email@mail.com"
+        value={formData.email}
+        onChange={handleChange}
+        className="text-black w-full p-2 mb-4 border border-gray-300 rounded"
+        required
+      />
+      <textarea
+        name="message"
+        cols={30}
+        rows={5}
+        placeholder="...type your message"
+        value={formData.message}
+        onChange={handleChange}
+        className="text-black w-full p-2 mb-4 border border-gray-300 rounded"
+        required
+      />
+      <Button
+        type="submit"
+        className="w-auto bg-primary  hover:shadow-lg hover:opacity-90 text-background font-bold py-2 px-4 rounded"
+      >
+        {isSending && <Loader color="#000" />} &nbsp; Send Message
+      </Button>
+    </form>
   );
 }

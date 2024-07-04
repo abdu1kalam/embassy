@@ -52,7 +52,7 @@ export const InfoBar = () => {
 
   return (
     <div className="bg-blue-900 flex items-center h-[80px]">
-      <nav className=" w-full max-w-[90%]  flex items-center justify-center  p-1 mx-auto relative">
+      <nav className="hidden w-full max-w-[90%]  md:flex items-center justify-center  p-1 mx-auto relative">
         <ul className="list-none p-0 flex gap-x-4 ">
           {menuData.map((menu, index) => (
             <li
